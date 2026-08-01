@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loh Jinawi — Simulasi Intrik Kekuasaan</title>
+<meta name="description" content="Simulasi multiplayer intrik politik, sandera kompromat, dan perebutan kekuasaan di negara fiksi Loh Jinawi." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ JOIN SCREEN -->
+<div id="join-screen" class="screen">
+  <div class="join-bg">
+    <canvas id="particle-canvas"></canvas>
+  </div>
+  <div class="join-content">
+    <div class="join-header">
+      <div class="join-emblem">⚖</div>
+      <h1 class="join-title">Loh Jinawi</h1>
+      <p class="join-subtitle">Simulasi Intrik Kekuasaan &amp; Politik Multiplayer</p>
+    </div>
+
+    <div class="join-card">
+      <div class="join-card-inner">
+        <h2>Masuki Dunia</h2>
+
+        <div class="form-group">
+          <label for="nama-input">Nama Karakter</label>
+          <input id="nama-input" type="text" placeholder="Siapa namamu?" autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label>Pilih Jalur Masuk</label>
+          <div class="jalur-grid">
+            <div class="jalur-card selected" data-jalur="ekonomi" id="jalur-ekonomi">
+              <div class="jalur-icon">💰</div>
+              <div class="jalur-name">Ekonomi</div>
+              <div class="jalur-desc">Modal lebih besar, akses birokrasi lewat bisnis</div>
+            </div>
+            <div class="jalur-card" data-jalur="sosial" id="jalur-sosial">
+              <div class="jalur-icon">🤝</div>
+              <div class="jalur-name">Sosial</div>
+              <div class="jalur-desc">Reputasi lebih tinggi, jaringan komunitas kuat</div>
+            </div>
+            <div class="jalur-card" data-jalur="bayangan" id="jalur-bayangan">
+              <div class="jalur-icon">🕵️</div>
+              <div class="jalur-name">Bayangan</div>
+              <div class="jalur-desc">Akses informasi cepat, tapi berisiko jadi kambing hitam</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-mulai-baru" class="btn-primary">Mulai sebagai Rakyat Biasa</button>
+
+        <div class="divider"><span>atau ambil alih tokoh yang tersedia</span></div>
+
+        <div id="npc-list" class="npc-list"></div>
+      </div>
+    </div>
+
+    <p class="join-note">Multiplayer LAN — bagikan alamat server ke sesama pemain</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ GAME SCREEN -->
+<div id="game-screen" class="screen hidden">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">⚖ Loh Jinawi</span>
+      <div class="era-badge" id="era-badge">
+        <span class="era-dot"></span>
+        <span id="era-label">Era Transisi</span>
+      </div>
+    </div>
+    <div class="topbar-center" id="topbar-me"></div>
+    <div class="topbar-right">
+      <div class="notif-btn" id="notif-btn" title="Notifikasi">
+        <span>🔔</span>
+        <span class="notif-badge hidden" id="notif-badge">0</span>
+      </div>
+      <div class="conn-status" id="conn-status">
+        <span class="conn-dot"></span>
+        <span>Terhubung</span>
+      </div>
+      <button class="btn-ghost btn-reset" id="btn-logout" title="Keluar">🚪 Logout</button>
+      <button class="btn-ghost btn-reset" id="btn-reset" title="Reset game">↺ Reset</button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="layout">
+
+    <!-- Panel Kiri: Karakter -->
+    <aside class="panel panel-left">
+      <div id="my-card" class="my-card"></div>
+
+      <div class="panel-section">
+        <div class="section-header">
+          <h3>Peta Kekuatan</h3>
+          <div class="tab-mini">
+            <button class="tab-btn-mini active" data-tab-mini="karakter">Tokoh</button>
+            <button class="tab-btn-mini" data-tab-mini="institusi">Institusi</button>
+          </div>
+        </div>
+
+        <div id="tab-karakter" class="tab-content-mini">
+          <input id="search-char" type="text" placeholder="Cari tokoh..." class="search-input" />
+          <div id="char-list" class="char-list"></div>
+        </div>
+
+        <div id="tab-institusi" class="tab-content-mini hidden">
+          <div id="inst-list" class="char-list"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Panel Tengah: Graph -->
+    <main class="panel panel-center">
+      <div class="graph-container">
+        <div class="graph-controls">
+          <button class="graph-ctrl-btn" id="btn-filter-all" title="Tampilkan semua">Semua</button>
+          <button class="graph-ctrl-btn" id="btn-filter-rahasia" title="Highlight relasi rahasia">Rahasia</button>
+          <button class="graph-ctrl-btn" id="btn-filter-rival" title="Highlight rival">Rival</button>
+          <button class="graph-ctrl-btn" id="btn-graph-zoom-in" title="Zoom in">＋</button>
+          <button class="graph-ctrl-btn" id="btn-graph-zoom-out" title="Zoom out">－</button>
+        </div>
+        <svg id="graph" viewBox="0 0 720 500"></svg>
+        <div class="graph-legend">
+          <div class="legend-item"><span class="legend-dot me"></span> Kamu</div>
+          <div class="legend-item"><span class="legend-dot player"></span> Pemain</div>
+          <div class="legend-item"><span class="legend-dot npc"></span> NPC</div>
+          <div class="legend-item"><span class="legend-line rival"></span> Rival</div>
+          <div class="legend-item"><span class="legend-line secret"></span> Rahasia</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Panel Kanan: Tab Panel -->
+    <aside class="panel panel-right">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="log">📜 Log</button>
+        <button class="tab-btn" data-tab="deals">🤝 Deal</button>
+        <button class="tab-btn" data-tab="kompromat">🗂 Bukti</button>
+      </div>
+
+      <div id="tab-log" class="tab-panel active">
+        <div class="log-filter">
+          <button class="log-filter-btn active" data-filter="all">Semua</button>
+          <button class="log-filter-btn" data-filter="skandal">Skandal</button>
+          <button class="log-filter-btn" data-filter="normal">Normal</button>
+        </div>
+        <div id="log-list" class="log-list"></div>
+      </div>
+
+      <div id="tab-deals" class="tab-panel hidden">
+        <div id="deals-incoming" class="deals-section">
+          <p class="section-sub">Tawaran Masuk</p>
+          <div id="deals-in-list" class="deal-list"></div>
+        </div>
+        <div id="deals-outgoing" class="deals-section">
+          <p class="section-sub">Tawaran Dikirim</p>
+          <div id="deals-out-list" class="deal-list"></div>
+        </div>
+      </div>
+
+      <div id="tab-kompromat" class="tab-panel hidden">
+        <p class="section-sub">Bukti yang kamu pegang</p>
+        <div id="my-kompromat-list" class="km-panel-list"></div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: Target -->
+<div id="target-modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-box modal-large">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <span class="modal-avatar" id="target-avatar">👤</span>
+        <div>
+          <div id="target-name" class="modal-title">-</div>
+          <div id="target-role" class="modal-subtitle">-</div>
+        </div>
+      </div>
+      <button class="close-btn" data-close aria-label="Tutup">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab-btn active" data-modal-tab="stats">📊 Status</button>
+      <button class="modal-tab-btn" data-modal-tab="relasi">🔗 Jaringan</button>
+      <button class="modal-tab-btn" data-modal-tab="aksi">⚔ Aksi</button>
+    </div>
+
+    <div id="modal-tab-stats" class="modal-body modal-tab-panel active">
+      <div class="stat-bars" id="target-stats"></div>
+    </div>
+
+    <div id="modal-tab-relasi" class="modal-body modal-tab-panel hidden">
+      <div id="target-relasi-list" class="relasi-list"></div>
+    </div>
+
+    <div id="modal-tab-aksi" class="modal-body modal-tab-panel hidden">
+      <div class="aksi-section">
+        <p class="aksi-label">Tindakan Dasar</p>
+        <div class="aksi-grid">
+          <button id="btn-investigasi" class="aksi-btn aksi-blue">
+            <span class="aksi-icon">🔍</span>
+            <span class="aksi-text">Investigasi</span>
+            <span class="aksi-cost">-15 💰</span>
+          </button>
+          <button id="btn-fitnah" class="aksi-btn aksi-red">
+            <span class="aksi-icon">🗞</span>
+            <span class="aksi-text">Buat Fitnah</span>
+            <span class="aksi-cost">-25 💰</span>
+          </button>
+          <button id="btn-deal" class="aksi-btn aksi-green">
+            <span class="aksi-icon">🤝</span>
+            <span class="aksi-text">Ajukan Deal</span>
+            <span class="aksi-cost">Gratis</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="aksi-section">
+        <p class="aksi-label">Tindakan Institusional</p>
+        <div class="aksi-grid">
+          <button id="btn-purge" class="aksi-btn aksi-orange">
+            <span class="aksi-icon">🔥</span>
+            <span class="aksi-text">Purge Institusi</span>
+            <span class="aksi-cost">-30 💰</span>
+          </button>
+          <button id="btn-capture" class="aksi-btn aksi-purple">
+            <span class="aksi-icon">🏛</span>
+            <span class="aksi-text">Capture Pimpinan</span>
+            <span class="aksi-cost">-80 💰</span>
+          </button>
+          <button id="btn-lemahkan" class="aksi-btn aksi-dark">
+            <span class="aksi-icon">⛓</span>
+            <span class="aksi-text">Lemahkan Institusi</span>
+            <span class="aksi-cost">-50 💰</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="aksi-section">
+        <p class="aksi-label">Strategi Keluar</p>
+        <div class="aksi-grid">
+          <button id="btn-pensiun" class="aksi-btn aksi-teal">
+            <span class="aksi-icon">🎩</span>
+            <span class="aksi-text">Pensiun Aman</span>
+            <span class="aksi-cost">-100 💰</span>
+          </button>
+          <button id="btn-terpojok" class="aksi-btn aksi-yellow">
+            <span class="aksi-icon">🛡</span>
+            <span class="aksi-text">Lawan Balik</span>
+            <span class="aksi-cost">Respons</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="km-section">
+        <p class="aksi-label">Kompromat tentang Tokoh Ini</p>
+        <div id="kompromat-list" class="km-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: Deal -->
+<div id="deal-modal" class="modal hidden" role="dialog">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">Ajukan Tawaran Deal</span>
+      <button class="close-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="deal-target-info" id="deal-target-info"></div>
+      <div class="form-group">
+        <label for="deal-syarat">Yang kamu minta (syarat)</label>
+        <input id="deal-syarat" type="text" placeholder="mis. Dukung pencalonanku di Parlemen" />
+      </div>
+      <div class="form-group">
+        <label for="deal-imbalan">Yang kamu tawarkan (imbalan)</label>
+        <input id="deal-imbalan" type="text" placeholder="mis. Bagi hasil kontrak tambang 20%" />
+      </div>
+      <button id="btn-kirim-deal" class="btn-primary">Kirim Tawaran</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: Kompromat Action -->
+<div id="km-action-modal" class="modal hidden" role="dialog">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">Gunakan Kompromat</span>
+      <button class="close-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="km-detail" class="km-detail-box"></div>
+      <div class="form-group" id="tuntutan-group" style="display:none">
+        <label for="km-tuntutan">Tuntutanmu (untuk mode Sandera)</label>
+        <input id="km-tuntutan" type="text" placeholder="mis. Mundur dari jabatanmu" />
+      </div>
+      <div class="km-mode-btns">
+        <button class="km-mode-btn km-sandera" data-mode="sandera">
+          <span>🔒</span> Sandera
+        </button>
+        <button class="km-mode-btn km-bongkar" data-mode="bongkar">
+          <span>📢</span> Bongkar ke Publik
+        </button>
+        <button class="km-mode-btn km-simpan" data-mode="simpan">
+          <span>🗄</span> Simpan Asuransi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: Terpojok -->
+<div id="terpojok-modal" class="modal hidden" role="dialog">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">⚠ Situasi Terpojok</span>
+      <button class="close-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Kamu dalam situasi terdesak. Pilih respons:</p>
+      <div class="terpojok-options">
+        <button class="terpojok-btn" data-opsi="bertahan">
+          <span class="t-icon">⚔️</span>
+          <div class="t-info">
+            <strong>Bertahan</strong>
+            <span>Gunakan backing untuk melawan. Jika backing kuat, reputasi naik drastis.</span>
+          </div>
+        </button>
+        <button class="terpojok-btn" data-opsi="kabur">
+          <span class="t-icon">🏃</span>
+          <div class="t-info">
+            <strong>Kabur / Mundur</strong>
+            <span>Tinggalkan jabatan, kembali ke titik nol. Bisa bangkit kembali.</span>
+          </div>
+        </button>
+        <button class="terpojok-btn" data-opsi="berkhianat">
+          <span class="t-icon">🗡️</span>
+          <div class="t-info">
+            <strong>Berkhianat</strong>
+            <span>Bocorkan informasi patron. Patron jadi musuh, tapi dapat kompromat baru.</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: Notifikasi -->
+<div id="notif-modal" class="modal hidden" role="dialog">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">🔔 Notifikasi</span>
+      <button class="close-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="notif-list"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden" role="alert"></div>
+<!-- Tooltip -->
+<div id="tooltip" class="tooltip hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
