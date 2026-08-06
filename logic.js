@@ -320,7 +320,7 @@ function actionPakaiKompromat(state, actorId, kompromatId, mode, tuntutan) {
 
     pushLog(state, `${actor.nama} membongkar skandal ${target.nama} ke publik. Reputasi ${target.nama} turun ${dampak} poin.`, "skandal");
     hapusKompromat(state, kompromatId);
-    triggerSeranganBalik(state, actorId, targetId);
+    triggerSeranganBalik(state, actorId, km.target);
     return { ok: true, message: `Skandal dibongkar. Reputasi ${target.nama} turun ${dampak} poin.` };
   }
 

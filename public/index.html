@@ -25,12 +25,30 @@
     </div>
 
     <div class="join-card">
-      <div class="join-card-inner">
-        <h2>Masuki Dunia</h2>
+      <div class="join-card-accent" aria-hidden="true">
+        <span class="accent-line"></span>
+        <span class="accent-diamond"></span>
+        <span class="accent-line"></span>
+      </div>
 
+      <div class="join-card-header">
+        <div class="join-card-emblem">⚖</div>
+        <div class="join-card-titles">
+          <h2>Masuki Dunia</h2>
+          <p>Pilih identitas &amp; jalur kekuasaanmu</p>
+        </div>
+      </div>
+
+      <div class="join-card-inner">
         <div class="form-group">
           <label for="nama-input">Nama Karakter</label>
-          <input id="nama-input" type="text" placeholder="Siapa namamu?" autocomplete="off" />
+          <div class="nama-row">
+            <input id="nama-input" type="text" placeholder="Siapa namamu?" autocomplete="off" />
+            <button id="btn-mulai-baru" class="btn-primary">
+              <span class="btn-shimmer"></span>
+              <span>Mulai</span>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -39,22 +57,23 @@
             <div class="jalur-card selected" data-jalur="ekonomi" id="jalur-ekonomi">
               <div class="jalur-icon">💰</div>
               <div class="jalur-name">Ekonomi</div>
-              <div class="jalur-desc">Modal lebih besar, akses birokrasi lewat bisnis</div>
+              <div class="jalur-desc">Modal besar, akses lewat bisnis</div>
+              <div class="jalur-check">✓</div>
             </div>
             <div class="jalur-card" data-jalur="sosial" id="jalur-sosial">
               <div class="jalur-icon">🤝</div>
               <div class="jalur-name">Sosial</div>
-              <div class="jalur-desc">Reputasi lebih tinggi, jaringan komunitas kuat</div>
+              <div class="jalur-desc">Reputasi tinggi, jaringan kuat</div>
+              <div class="jalur-check">✓</div>
             </div>
             <div class="jalur-card" data-jalur="bayangan" id="jalur-bayangan">
               <div class="jalur-icon">🕵️</div>
               <div class="jalur-name">Bayangan</div>
-              <div class="jalur-desc">Akses informasi cepat, tapi berisiko jadi kambing hitam</div>
+              <div class="jalur-desc">Akses informasi, risiko tinggi</div>
+              <div class="jalur-check">✓</div>
             </div>
           </div>
         </div>
-
-        <button id="btn-mulai-baru" class="btn-primary">Mulai sebagai Rakyat Biasa</button>
 
         <div class="divider"><span>atau ambil alih tokoh yang tersedia</span></div>
 

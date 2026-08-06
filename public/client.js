@@ -165,11 +165,27 @@ function renderNpcList() {
     .sort((a, b) => b.kekuatan_politik - a.kekuatan_politik)
     .slice(0, 8)
     .forEach((c) => {
+      const initials = c.nama.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+      const rep = Math.round(c.reputasi_publik);
+      const pol = Math.round(c.kekuatan_politik);
       const div = document.createElement("div");
       div.className = "npc-item";
       div.innerHTML = `
-        <span class="npc-name">${c.nama}</span>
-        <span class="npc-rep">Rep: ${Math.round(c.reputasi_publik)} | Pol: ${Math.round(c.kekuatan_politik)}</span>
+        <div class="npc-avatar">${initials}</div>
+        <div class="npc-info">
+          <span class="npc-name">${c.nama}</span>
+          <span class="npc-role">${jabatanLabel(c)}</span>
+        </div>
+        <div class="npc-stats">
+          <div class="npc-stat" title="Reputasi publik">
+            <span class="stat-label">Rep</span>
+            <div class="stat-bar"><div class="stat-fill gold" style="width:${Math.max(4, rep)}%"></div></div>
+          </div>
+          <div class="npc-stat" title="Kekuatan politik">
+            <span class="stat-label">Pol</span>
+            <div class="stat-bar"><div class="stat-fill" style="width:${Math.max(4, pol)}%"></div></div>
+          </div>
+        </div>
       `;
       div.onclick = () => socket.emit("player:join", { nama: c.nama, pilihKarakterId: c.id, jalurMasuk: null });
       list.appendChild(div);
